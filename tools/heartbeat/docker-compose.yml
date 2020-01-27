@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+
+  goshimmer:
+    image: iotaledger/goshimmer
+    build:
+      context: ../../
+      dockerfile: Dockerfile
+    container_name: heartbeat_node
+    restart: unless-stopped
+    ports:
+      - "14667:14667/tcp"
+      - "14627:14627/udp"
+    expose:
+      - 8080
+    command: "--autopeering.port=14627 --gossip.port=14667 --webapi.bindAddress='0.0.0.0:8080'"
+
+  heartbeat:
+    image: iotaledger/goshimmer-heartbeat
+    depends_on:
+      - goshimmer
+    build:
+      context: ../../
+      dockerfile: tools/heartbeat/Dockerfile
+    container_name: heartbeat_client
+    command: "--node='heartbeat_node:8080'"
